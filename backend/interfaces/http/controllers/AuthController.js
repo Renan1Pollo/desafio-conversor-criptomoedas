@@ -23,7 +23,7 @@ class AuthController {
     const { email, password, name } = req.body || {};
     
     if (!email || !password || !name) {
-      return res.status(400).json({ error: 'Name, email e senha são obrigatórios.' });
+      return res.status(400).json({ error: 'Nome, email e senha são obrigatórios.' });
     }
 
     try {
