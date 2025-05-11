@@ -12,9 +12,10 @@ interface LoginData {
 }
 
 class AuthService {
-  private apiUrl = import.meta.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+  private apiUrl: string;
 
   constructor() {
+    this.apiUrl = import.meta.env.VITE_API_URL;
   }
 
   async register(data: RegisterData): Promise<any> {
@@ -27,15 +28,14 @@ class AuthService {
     }
   }
 
-
-  async login(data: LoginData): Promise<string> {
+ 
+  async login(data: LoginData): Promise<any> {
     try {
       const response = await axios.post(`${this.apiUrl}/login`, data);
-      const jwt = response.data.token;
-      return jwt;
-    } catch (error) {
-      console.error('Erro ao fazer login:', error);
-      throw error;
+      return { success: true, data: response.data.token };
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.error || 'Erro inesperado na autenticacão.';
+      return { success: false, error: errorMsg };
     }
   }
 }
