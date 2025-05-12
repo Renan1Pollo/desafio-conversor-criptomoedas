@@ -18,6 +18,14 @@ class JwtService {
     return jwt.sign(payload, this.secret, { expiresIn: this.expiresIn });
   }
 
+  validateToken(token) {
+    if (!token) {
+      throw new Error('Token JWT não fornecido.');
+    }
+  
+    return this.verifyToken(token);
+  }
+
   verifyToken(token) {
     return jwt.verify(token, this.secret);
   }
