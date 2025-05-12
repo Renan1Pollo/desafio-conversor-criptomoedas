@@ -10,7 +10,7 @@ type ButtonProps = {
   [key: string]: any;
 };
 
-const Button: React.FC<ButtonProps> = ({
+export const Button: React.FC<ButtonProps> = ({
   type = 'button',
   variant = 'primary',
   children,
@@ -35,5 +35,3 @@ const Button: React.FC<ButtonProps> = ({
     </button>
   );
 };
-
-export default Button;
