@@ -29,8 +29,9 @@ class CreateConversionHistoryUseCase {
       quantity
     } = cryptoData;
 
-    const convertedUsd = parseFloat((Number(quantity) * Number(priceUSD)).toFixed(4));
-    const convertedBrl = parseFloat((Number(quantity) * Number(priceBRL)).toFixed(4));
+    const parsedQuantity = Number(quantity);
+    const convertedUsd = parsedQuantity * Number(priceUSD);
+    const convertedBrl = parsedQuantity * Number(priceBRL);
 
     const newConversion = new ConversionHistory(
       null,
