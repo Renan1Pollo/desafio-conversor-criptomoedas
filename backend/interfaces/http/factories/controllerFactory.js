@@ -1,8 +1,7 @@
-// backend/interfaces/http/factories/controllerFactory.js
-
 const JwtService = require("../../../infrastructure/auth/JwtService");
 const UserRepositoryAdapter = require("../../../infrastructure/repositories/UserRepository");
 const FavoriteCryptoRepositoryAdapter = require("../../../infrastructure/repositories/FavoriteCryptoRepository");
+const ConversionHistoryRepositoryAdapter = require("../../../infrastructure/repositories/ConversionHistoryRepository");
 const CryptoMarketProvider = require("../../../infrastructure/providers/CryptoMarketProvider");
 const db = require("../../../config/db");
 const jwtConfig = require("../../../config/jwtConfig");
@@ -14,16 +13,20 @@ const AddFavoriteCryptoUseCase = require("../../../application/usecases/AddFavor
 const RemoveFavoriteCryptoUseCase = require("../../../application/usecases/RemoveFavoriteCryptoUseCase");
 const FetchCryptosUseCase = require("../../../application/usecases/FetchCryptosUseCase");
 const GetFavoriteCryptosUseCase = require("../../../application/usecases/GetFavoriteCryptosUseCase");
+const GetUserConversionHistoryUseCase = require("../../../application/usecases/GetUserConversionHistoryUseCase");
+const CreateConversionHistoryUseCase = require("../../../application/usecases/CreateConversionHistoryUseCase");
 
 // Controllers
 const AuthController = require("../controllers/AuthController");
 const FavoriteCryptoController = require("../controllers/FavoriteCryptoController");
 const CryptoController = require("../controllers/CryptoController");
+const ConversionHistoryController = require("../controllers/ConversionHistoryController");
 
 // Infrastructure Instances
 const jwtService = new JwtService(jwtConfig.secret, jwtConfig.expiresIn);
 const userRepository = new UserRepositoryAdapter(db);
 const favoriteCryptoRepository = new FavoriteCryptoRepositoryAdapter(db);
+const conversionHistoryRepository = new ConversionHistoryRepositoryAdapter(db);
 
 // Use Case Instances
 const authUserUseCase = new AuthUserUseCase(userRepository, jwtService);
@@ -33,18 +36,29 @@ const removeFavoriteCryptoUseCase = new RemoveFavoriteCryptoUseCase(favoriteCryp
 const fetchCryptosUseCase = new FetchCryptosUseCase(CryptoMarketProvider);
 const getFavoriteCryptosUseCase = new GetFavoriteCryptosUseCase(favoriteCryptoRepository);
 
+const getUserConversionHistoryUseCase = new GetUserConversionHistoryUseCase(conversionHistoryRepository);
+const createConversionHistoryUseCase = new CreateConversionHistoryUseCase(conversionHistoryRepository);
+
 // Controller Instances
 const authController = new AuthController(authUserUseCase, createUserUseCase);
+
+const conversionHistoryController = new ConversionHistoryController(
+  createConversionHistoryUseCase,
+  getUserConversionHistoryUseCase
+);
+
 const favoriteCryptoController = new FavoriteCryptoController(
   addFavoriteCryptoUseCase,
   removeFavoriteCryptoUseCase,
-  getFavoriteCryptosUseCase,
-  jwtService
+  getFavoriteCryptosUseCase
 );
+
+
 const cryptoController = new CryptoController(fetchCryptosUseCase);
 
 module.exports = {
   authController,
   favoriteCryptoController,
   cryptoController,
+  conversionHistoryController
 };

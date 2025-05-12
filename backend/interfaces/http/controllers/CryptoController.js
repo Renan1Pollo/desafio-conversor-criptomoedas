@@ -19,7 +19,6 @@ class CryptoController {
 
       return res.status(200).json(cryptos);
     } catch (error) {
-      console.error("[CryptoController] getCryptos:", error.message);
       return res.status(500).json({ message: "Erro ao buscar criptomoedas." });
     }
   }
