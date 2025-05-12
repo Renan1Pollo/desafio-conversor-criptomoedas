@@ -1,58 +1,66 @@
-import React, { useEffect, useState } from 'react';
-import Button from '../../components/buttons/Button';
-import FloatingInput from '../../components/inputs/InputFloating';
-import routes from '../../routes/routes';
-import AuthService from '../../services/AuthService';
+import { z } from "zod";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../../components/buttons/Button";
+import FloatingInput from "../../components/inputs/InputFloating";
+import routes from "../../routes/routes";
+import { login } from "../../services/AuthService";
 
-const LoginPage: React.FC = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+const loginSchema = z.object({
+  email: z.string().email("E-mail inválido"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+});
 
+export const LoginPage = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isFormValid, setIsFormValid] = useState(false);
+  const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+  const isLoginFormValid = (): boolean => {
+    const result = loginSchema.safeParse({ email, password });
+
+    if (result.success) return true;
+
+    const [firstIssue] = result.error.errors;
+    setError(firstIssue?.message ?? "Dados inválidos");
+
+    return false;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitLoginForm = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
 
-    const response = await AuthService.login(formData);
+    if (!isLoginFormValid()) return;
 
-    if (response.success) {
-      window.location.href = routes.auth.login;
-    } else {
-      setError(response.error || 'Erro ao autenticar usuário. Tente novamente.');
+    const authResponse = await login({ email, password });
+
+    if (!authResponse.success) {
+      const fallbackMessage = "Erro ao autenticar usuário. Tente novamente.";
+      setError(authResponse.error ?? fallbackMessage);
+      return;
     }
-  };
 
-  useEffect(() => {
-    const { email, password} = formData;
-    setIsFormValid(email.trim() !== '' && password.trim() !== '');
-  }, [formData]);
+    localStorage.setItem("token", authResponse.data!);
+    navigate(routes.home);
+  };
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-        <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+        <div className="w-full bg-white rounded-lg shadow dark:border sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white text-center">
               Fazer login
             </h1>
 
-            <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-4 md:space-y-6" onSubmit={submitLoginForm}>
               <FloatingInput
                 id="email"
                 label="Seu email"
-                value={formData.email}
-                onChange={handleChange}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 name="email"
                 required
@@ -61,9 +69,8 @@ const LoginPage: React.FC = () => {
               <FloatingInput
                 id="password"
                 label="Senha"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 name="password"
                 required
@@ -79,14 +86,15 @@ const LoginPage: React.FC = () => {
                 type="submit"
                 variant="primary"
                 className="w-full"
-                disabled={!isFormValid}
               >
                 Entrar
               </Button>
 
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                Ainda não tem uma conta?
-                <a href={routes.auth.register} className="font-medium text-primary-600 hover:underline dark:text-primary-500"> Criar conta</a>
+                Ainda não tem uma conta? 
+                <a href={routes.auth.register} className="font-medium text-primary-600 hover:underline dark:text-primary-500">
+                  Criar conta
+                </a>
               </p>
             </form>
           </div>
@@ -95,5 +103,3 @@ const LoginPage: React.FC = () => {
     </section>
   );
 };
-
-export default LoginPage;

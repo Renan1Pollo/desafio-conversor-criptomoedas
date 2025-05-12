@@ -1,77 +1,54 @@
-import React, { useEffect, useState } from 'react';
-import Button from '../../components/buttons/Button';
-import FloatingInput from '../../components/inputs/InputFloating';
-import routes from '../../routes/routes';
-import AuthService from '../../services/AuthService';
+import { z } from "zod";
 
-const PASSWORD_MISMATCH_ERROR = 'As senhas não são iguais. Tente novamente.';
-const GENERIC_REGISTRATION_ERROR = 'Erro ao registrar usuário. Tente novamente.';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../../components/buttons/Button";
+import FloatingInput from "../../components/inputs/InputFloating";
+import { register } from "../../services/AuthService";
+import routes from "../../routes/routes";
 
-const RegisterPage: React.FC = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+const registerSchema = z
+  .object({
+    name: z.string().min(1, "Nome é obrigatório"),
+    email: z.string().email("E-mail inválido"),
+    password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+    confirmPassword: z.string().min(6, "Confirmação de senha obrigatória"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não são iguais.",
+    path: ["confirmPassword"],
   });
 
+export const RegisterPage = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isFormValid, setIsFormValid] = useState(false);
+  const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+  const isFormValid = (): boolean => {
+    const result = registerSchema.safeParse({ name, email, password, confirmPassword });
+    if (result.success) return true;
+    const [firstIssue] = result.error.errors;
+    setError(firstIssue?.message ?? "Dados inválidos");
+    return false;
   };
 
-  const validatePasswords = (password: string, confirmPassword: string): boolean => {
-    return password === confirmPassword;
-  };
+  const submitRegisterForm = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
 
-  const getFormPayload = (form: typeof formData) => {
-    const { name, email, password } = form;
-    return { name, email, password };
-  };
+    if (!isFormValid()) return;
 
-  const registerUser = async (
-    payload: { name: string; email: string; password: string }
-  ): Promise<{ success: boolean; error?: string }> => {
-    try {
-      return await AuthService.register(payload);
-    } catch {
-      return { success: false, error: GENERIC_REGISTRATION_ERROR };
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const { password, confirmPassword } = formData;
-
-    if (!validatePasswords(password, confirmPassword)) {
-      setError(PASSWORD_MISMATCH_ERROR);
-      return;
-    }
-
-    const payload = getFormPayload(formData);
-    const response = await registerUser(payload);
+    const response = await register({ name, email, password });
 
     if (response.success) {
-      alert('Registro realizado com sucesso!');
-      window.location.href = routes.auth.login;
+      navigate(routes.auth.login);
     } else {
-      setError(response.error || GENERIC_REGISTRATION_ERROR);
+      setError(response.error ?? "Erro ao registrar usuário. Tente novamente.");
     }
   };
-
-  useEffect(() => {
-    const { name, email, password, confirmPassword } = formData;
-    setIsFormValid(
-      name.trim() !== '' && email.trim() !== '' && password.trim() !== '' && confirmPassword.trim() !== ''
-    );
-  }, [formData]);
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900 min-h-screen">
@@ -82,12 +59,12 @@ const RegisterPage: React.FC = () => {
               Criar uma conta
             </h1>
 
-            <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-4 md:space-y-6" onSubmit={submitRegisterForm}>
               <FloatingInput
                 id="username"
                 label="Seu nome de usuário"
-                value={formData.name}
-                onChange={handleChange}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="João Silva"
                 type="text"
                 name="name"
@@ -97,8 +74,8 @@ const RegisterPage: React.FC = () => {
               <FloatingInput
                 id="email"
                 label="Seu email"
-                value={formData.email}
-                onChange={handleChange}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 name="email"
                 required
@@ -107,8 +84,8 @@ const RegisterPage: React.FC = () => {
               <FloatingInput
                 id="password"
                 label="Senha"
-                value={formData.password}
-                onChange={handleChange}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 type="password"
                 name="password"
@@ -118,8 +95,8 @@ const RegisterPage: React.FC = () => {
               <FloatingInput
                 id="confirmPassword"
                 label="Confirmar senha"
-                value={formData.confirmPassword}
-                onChange={handleChange}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
                 type="password"
                 name="confirmPassword"
@@ -136,14 +113,18 @@ const RegisterPage: React.FC = () => {
                 type="submit"
                 variant="primary"
                 className="w-full"
-                disabled={!isFormValid}
               >
                 Criar conta
               </Button>
 
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Já tem uma conta?
-                <a href={routes.auth.login} className="font-medium text-primary-600 hover:underline dark:text-primary-500"> Faça login aqui</a>
+                <a
+                  href={routes.auth.login}
+                  className="font-medium text-primary-600 hover:underline dark:text-primary-500"
+                >
+                  Faça login aqui
+                </a>
               </p>
             </form>
           </div>
@@ -152,5 +133,3 @@ const RegisterPage: React.FC = () => {
     </section>
   );
 };
-
-export default RegisterPage;

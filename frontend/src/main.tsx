@@ -1,21 +1,25 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import Register from './features/Auth/Register'
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import routes from '../src/routes/routes'
-import LoginPage from './features/Auth/Login'
+import { LoginPage } from './features/Auth/Login'
+import { RegisterPage } from './features/Auth/Register'
+import './index.css'
 
 const router = createBrowserRouter([
   {
     path: routes.auth.register,
-    element: <Register/>
+    element: <RegisterPage/>
   },
   {
     path: routes.auth.login,
     element: <LoginPage/>
   },
-])
+  {
+    path: '*',
+    element: <Navigate to={routes.auth.login} replace />,
+  },
+]);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
