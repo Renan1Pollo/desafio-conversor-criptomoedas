@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 interface RegisterData {
   name: string;
@@ -11,33 +11,24 @@ interface LoginData {
   password: string;
 }
 
-class AuthService {
-  private apiUrl: string;
+const API_URL = import.meta.env.VITE_API_URL;
 
-  constructor() {
-    this.apiUrl = import.meta.env.VITE_API_URL;
-  }
-
-  async register(data: RegisterData): Promise<any> {
-    try {
-      const response = await axios.post(`${this.apiUrl}/register`, data);
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.error || 'Erro inesperado no registro.';
-      return { success: false, error: errorMsg };
-    }
-  }
-
- 
-  async login(data: LoginData): Promise<any> {
-    try {
-      const response = await axios.post(`${this.apiUrl}/login`, data);
-      return { success: true, data: response.data.token };
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.error || 'Erro inesperado na autenticacão.';
-      return { success: false, error: errorMsg };
-    }
+export async function register(data: RegisterData): Promise<{ success: boolean; data?: any; error?: string }> {
+  try {
+    const response = await axios.post(`${API_URL}/register`, data);
+    return { success: true, data: response.data };
+  } catch (error: any) {
+    const errorMsg = error.response?.data?.error || "Erro inesperado no registro.";
+    return { success: false, error: errorMsg };
   }
 }
 
-export default new AuthService();
+export async function login(credentials: LoginData): Promise<{ success: boolean; data?: string; error?: string }> {
+  try {
+    const { data } = await axios.post(`${API_URL}/login`, credentials);
+    return { success: true, data: data.token };
+  } catch (error: any) {
+    const message = error.response?.data?.error ?? "Erro inesperado na autenticação.";
+    return { success: false, error: message };
+  }
+}
