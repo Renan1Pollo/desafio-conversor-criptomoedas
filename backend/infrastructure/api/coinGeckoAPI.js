@@ -23,11 +23,9 @@ class CoinGeckoAPI {
         sparkline: false,
       };
 
-      console.log(process.env.COINGECKO_API_URL + '/coins/markets' + params );
       const { data } = await this.client.get("/coins/markets", { params });
       return data;
     } catch (error) {
-      console.error("[CoinGeckoAPI] fetchCryptocurrencies:", error.message);
       throw new Error("Unable to fetch cryptocurrencies from CoinGecko API.");
     }
   }
