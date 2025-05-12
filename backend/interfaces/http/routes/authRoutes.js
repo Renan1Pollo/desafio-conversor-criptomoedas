@@ -6,8 +6,8 @@ const authenticateToken = require("../middleware/authMiddleware");
 
 router.post("/api/login", (req, res) => authController.login(req, res));
 router.post("/api/register", (req, res) => authController.register(req, res));
-router.post("/api/addFavorite", authenticateToken, (req, res) => favoriteCryptoController.addFavorite(req, res));
-router.delete("/api/removeFavorite", authenticateToken, (req, res) => favoriteCryptoController.removeFavorite(req, res));
+router.post("/api/favorites", authenticateToken, (req, res) => favoriteCryptoController.addFavorite(req, res));
+router.delete("/api/favorites", authenticateToken, (req, res) => favoriteCryptoController.removeFavorite(req, res));
 router.get("/api/cryptos", authenticateToken, (req, res) => cryptoController.fetchCryptocurrencies(req, res));
 
 module.exports = router;
