@@ -10,6 +10,7 @@ type InputProps = {
   type?: string;
   required?: boolean;
   className?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 };
 
 export const Input: React.FC<InputProps> = ({
@@ -22,6 +23,7 @@ export const Input: React.FC<InputProps> = ({
   type = "text",
   required = false,
   className = "",
+  inputMode,
 }) => {
   return (
     <div className="w-full">
@@ -37,6 +39,7 @@ export const Input: React.FC<InputProps> = ({
         onChange={onChange}
         placeholder={placeholder}
         required={required}
+        inputMode={inputMode}
         className={`w-full border border-gray-300 rounded px-3 py-2 bg-white ${className}`}
       />
     </div>
