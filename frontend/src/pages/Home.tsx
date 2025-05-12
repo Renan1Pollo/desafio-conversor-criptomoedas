@@ -1,28 +1,27 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "../components/buttons/Button";
 import { Card } from "../components/cards/Card";
 import { Input } from "../components/inputs/Input";
+import type { Option } from "../components/inputs/SelectInput";
 import { SelectInput } from "../components/inputs/SelectInput";
 import { HistoryTable } from "../components/tables/HistoryTable";
 import { FavoriteCoins } from "../features/conversion/FavoriteCoins";
+import { convertCrypto, getConversionHistory } from "../services/conversionHistoryService";
 import { fetchCryptos } from "../services/cryptoService";
-import {
-  addFavoriteCrypto,
-  removeFavoriteCrypto,
-  getFavoriteCryptos,
-} from "../services/favoriteCryptoService";
+import { addFavoriteCrypto, getFavoriteCryptos, removeFavoriteCrypto } from "../services/favoriteCryptoService";
+import type { ConversionHistoryResponse } from "../types/ConversionHistoryResponse";
+import type { Crypto } from "../types/Crypto";
 import { buildCryptoOptions } from "../utils/buildCryptoOptions";
 import { mapFavoriteToCrypto } from "../utils/mapFavoriteToCrypto";
-
-import type { Crypto } from "../types/Crypto";
-import type { Option } from "../components/inputs/SelectInput";
+import { mapHistoryToTable } from "../utils/mapHistoryToTable";
 
 export const Home = () => {
   const [cryptos, setCryptos] = useState<Crypto[]>([]);
   const [favoriteCryptos, setFavoriteCryptos] = useState<Crypto[]>([]);
   const [selectedCrypto, setSelectedCrypto] = useState<Crypto | null>(null);
   const [quantity, setQuantity] = useState("");
-  const [historyItems, setHistoryItems] = useState<any[]>([]);
+  const [historyItems, setHistoryItems] = useState<ConversionHistoryResponse[]>([]);
 
   useEffect(() => {
     loadInitialData();
@@ -30,24 +29,54 @@ export const Home = () => {
 
   const loadInitialData = async () => {
     try {
-      const [cryptosData, favoritesRaw] = await Promise.all([
+      const [cryptosData, favoritesRaw, historyData] = await Promise.all([
         fetchCryptos(),
         getFavoriteCryptos(),
+        getConversionHistory(),
       ]);
 
       setCryptos(cryptosData);
       setFavoriteCryptos(mapFavoriteToCrypto(favoritesRaw));
+      setHistoryItems(historyData);
     } catch (error) {
       console.error("Erro ao carregar dados iniciais:", error);
     }
   };
 
-  const selectCryptoBySymbol = (symbol: string) => {
+  const convertSelectedCrypto = async () => {
+    if (!selectedCrypto || !quantity) return;
+
+    const conversionRequest = buildConversionRequest(selectedCrypto, quantity);
+
+    try {
+      const newConversion = await convertCrypto(conversionRequest);
+      prependNewConversionToHistory(newConversion);
+      setQuantity("");
+    } catch (error) {
+      console.error("Erro ao converter:", error);
+    }
+  };
+
+  const buildConversionRequest = (crypto: Crypto, qty: string) => ({
+    cryptoId: crypto.cryptoId,
+    cryptoName: crypto.cryptoName,
+    coinSymbol: crypto.coinSymbol,
+    coinImage: crypto.coinImage,
+    priceUSD: crypto.priceUSD,
+    priceBRL: crypto.priceBRL,
+    quantity: Number(qty),
+  });
+
+  const prependNewConversionToHistory = (conversion: ConversionHistoryResponse) => {
+    setHistoryItems((prev) => [conversion, ...prev]);
+  };
+
+  const updateSelectedCrypto = (symbol: string) => {
     const found = cryptos.find((crypto) => crypto.coinSymbol === symbol);
     setSelectedCrypto(found || null);
   };
 
-  const toggleFavoriteCrypto = async (symbol: string) => {
+  const toggleCryptoFavorite = async (symbol: string) => {
     const crypto = cryptos.find((c) => c.coinSymbol === symbol);
     if (!crypto) return;
 
@@ -61,11 +90,10 @@ export const Home = () => {
         setFavoriteCryptos((prev) =>
           prev.filter((f) => f.cryptoId !== crypto.cryptoId)
         );
-        return;
+      } else {
+        await addFavoriteCrypto(crypto);
+        setFavoriteCryptos((prev) => [...prev, crypto]);
       }
-
-      await addFavoriteCrypto(crypto);
-      setFavoriteCryptos((prev) => [...prev, crypto]);
     } catch (error) {
       console.error("Erro ao atualizar favoritos:", error);
     }
@@ -81,7 +109,7 @@ export const Home = () => {
         <FavoriteCoins
           coins={favoriteCryptos}
           selectedCrypto={selectedCrypto?.coinSymbol || ""}
-          onSelect={selectCryptoBySymbol}
+          onSelect={updateSelectedCrypto}
         />
 
         <div className="flex flex-col md:flex-row gap-4 mb-4">
@@ -89,27 +117,33 @@ export const Home = () => {
             title="Criptomoeda"
             options={cryptoOptions}
             value={selectedCrypto?.coinSymbol || ""}
-            onChange={selectCryptoBySymbol}
-            onToggleFavorite={toggleFavoriteCrypto}
+            onChange={updateSelectedCrypto}
+            onToggleFavorite={toggleCryptoFavorite}
           />
 
           <Input
             id="quantity"
             label="Quantidade"
             name="quantity"
-            type="number"
+            type="text"
+            inputMode="decimal"
             required
             value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
+            onChange={(e) => {setQuantity(e.target.value.replace(",", "."))}}
           />
         </div>
 
-        <Button type="submit" variant="primary" className="w-full">
+        <Button
+          type="button"
+          variant="primary"
+          className="w-full"
+          onClick={convertSelectedCrypto}
+        >
           Converter
         </Button>
       </Card>
 
-      <HistoryTable items={historyItems} />
+      <HistoryTable items={mapHistoryToTable(historyItems)} />
     </div>
   );
 };
