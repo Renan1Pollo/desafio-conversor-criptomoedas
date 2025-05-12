@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/buttons/Button";
 import FloatingInput from "../../components/inputs/InputFloating";
 import routes from "../../routes/routes";
-import { login } from "../../services/AuthService";
+import { login } from "../../services/authService";
 
 const loginSchema = z.object({
   email: z.string().email("E-mail inválido"),

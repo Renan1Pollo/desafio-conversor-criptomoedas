@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/buttons/Button";
 import FloatingInput from "../../components/inputs/InputFloating";
-import { register } from "../../services/AuthService";
+import { register } from "../../services/authService";
 import routes from "../../routes/routes";
 
 const registerSchema = z

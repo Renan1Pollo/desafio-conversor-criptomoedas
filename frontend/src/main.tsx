@@ -4,16 +4,21 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import routes from '../src/routes/routes'
 import { LoginPage } from './features/Auth/Login'
 import { RegisterPage } from './features/Auth/Register'
+import { Home } from './pages/Home'
 import './index.css'
 
 const router = createBrowserRouter([
   {
     path: routes.auth.register,
-    element: <RegisterPage/>
+    element: <RegisterPage />
   },
   {
     path: routes.auth.login,
-    element: <LoginPage/>
+    element: <LoginPage />
+  },
+  {
+    path: routes.home,
+    element: <Home />
   },
   {
     path: '*',
