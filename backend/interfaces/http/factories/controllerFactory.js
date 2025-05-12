@@ -13,6 +13,7 @@ const CreateUserUseCase = require("../../../application/usecases/CreateUserUseCa
 const AddFavoriteCryptoUseCase = require("../../../application/usecases/AddFavoriteCryptoUseCase");
 const RemoveFavoriteCryptoUseCase = require("../../../application/usecases/RemoveFavoriteCryptoUseCase");
 const FetchCryptosUseCase = require("../../../application/usecases/FetchCryptosUseCase");
+const GetFavoriteCryptosUseCase = require("../../../application/usecases/GetFavoriteCryptosUseCase");
 
 // Controllers
 const AuthController = require("../controllers/AuthController");
@@ -30,12 +31,14 @@ const createUserUseCase = new CreateUserUseCase(userRepository);
 const addFavoriteCryptoUseCase = new AddFavoriteCryptoUseCase(favoriteCryptoRepository);
 const removeFavoriteCryptoUseCase = new RemoveFavoriteCryptoUseCase(favoriteCryptoRepository);
 const fetchCryptosUseCase = new FetchCryptosUseCase(CryptoMarketProvider);
+const getFavoriteCryptosUseCase = new GetFavoriteCryptosUseCase(favoriteCryptoRepository);
 
 // Controller Instances
 const authController = new AuthController(authUserUseCase, createUserUseCase);
 const favoriteCryptoController = new FavoriteCryptoController(
   addFavoriteCryptoUseCase,
   removeFavoriteCryptoUseCase,
+  getFavoriteCryptosUseCase,
   jwtService
 );
 const cryptoController = new CryptoController(fetchCryptosUseCase);

@@ -1,7 +1,8 @@
 class FavoriteCryptoController {
-  constructor(addFavoriteCryptoUseCase, removeFavoriteCryptoUseCase) {
+  constructor(addFavoriteCryptoUseCase, removeFavoriteCryptoUseCase, getFavoriteCryptosUseCase) {
     this.addFavoriteCryptoUseCase = addFavoriteCryptoUseCase;
     this.removeFavoriteCryptoUseCase = removeFavoriteCryptoUseCase;
+    this.getFavoriteCryptosUseCase = getFavoriteCryptosUseCase;
   }
 
   /**
@@ -46,6 +47,22 @@ class FavoriteCryptoController {
       return res.status(200).json({ message: 'Criptomoeda removida dos favoritos com sucesso.' });
     } catch (error) {
       return res.status(404).json({ error: error.message });
+    }
+  }
+
+  /**
+   * Retorna todas as criptomoedas favoritas do usuário.
+   * @param {string} userId - ID do usuário.
+   * @returns {Promise<void>} - Promessa que indica a conclusão da operação.
+   */
+  async getFavorites(req, res) {
+    try {
+      const userId = req.user.sub;
+      const favorites = await this.getFavoriteCryptosUseCase.getUserFavoriteCryptos(userId);
+
+      return res.status(200).json(favorites);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
     }
   }
 }
