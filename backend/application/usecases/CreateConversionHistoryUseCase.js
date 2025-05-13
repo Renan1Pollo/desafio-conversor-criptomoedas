@@ -1,3 +1,4 @@
+const InvalidInputError = require("../../domain/errors/InvalidInputError");
 const ConversionHistory = require("../../domain/entities/ConversionHistory");
 
 class CreateConversionHistoryUseCase {
@@ -30,8 +31,17 @@ class CreateConversionHistoryUseCase {
     } = cryptoData;
 
     const parsedQuantity = Number(quantity);
-    const convertedUsd = parsedQuantity * Number(priceUSD);
-    const convertedBrl = parsedQuantity * Number(priceBRL);
+
+    if (parsedQuantity < 0) {
+      throw new InvalidInputError("Quantidade inválida.");
+    }
+
+    const convertedUsd = Number((parsedQuantity * Number(priceUSD)).toFixed(2));
+    const convertedBrl = Number((parsedQuantity * Number(priceBRL)).toFixed(2));
+
+    if (convertedUsd <= 0 || convertedBrl <= 0) {
+      throw new InvalidInputError("Valor convertido inválido. Verifique a quantidade.");
+    }
 
     const newConversion = new ConversionHistory(
       null,

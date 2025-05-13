@@ -39,6 +39,10 @@ class ConversionHistoryController {
 
       return res.status(201).json({ message: 'Conversão registrada com sucesso!', conversion });
     } catch (error) {
+      if (error.statusCode) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      
       return res.status(500).json({ error: error.message });
     }
   }

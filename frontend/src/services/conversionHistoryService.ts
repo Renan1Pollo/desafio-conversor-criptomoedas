@@ -13,12 +13,9 @@ const ENDPOINT = "/history";
 export async function convertCrypto(
   request: ConversionHistoryRequest
 ): Promise<ConversionHistoryResponse> {
-  try {
-    const response = await api.post(ENDPOINT, request);
-    return response.data.conversion;
-  } catch (error: any) {
-    throw new Error("Erro na conversão da criptomoeda.");
-  }
+  return api.post(ENDPOINT, request)
+    .then((res) => res.data.conversion)
+    .catch((error) => { throw error; });
 }
 
 /**

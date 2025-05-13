@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "../components/buttons/Button";
 import { Card } from "../components/cards/Card";
@@ -24,7 +23,8 @@ export const Home = () => {
   const [selectedCrypto, setSelectedCrypto] = useState<Crypto | null>(null);
   const [quantity, setQuantity] = useState("");
   const [historyItems, setHistoryItems] = useState<ConversionHistoryResponse[]>([]);
-  
+  const [conversionError, setConversionError] = useState<string | null>(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,7 +42,9 @@ export const Home = () => {
       setCryptos(cryptosData);
       setFavoriteCryptos(mapFavoriteToCrypto(favoritesRaw));
       setHistoryItems(historyData);
-    } catch (error) {}
+    } catch (error) {
+      logError("Erro ao carregar dados iniciais:", error);
+    }
   };
 
   const logout = () => {
@@ -59,10 +61,16 @@ export const Home = () => {
       const newConversion = await convertCrypto(conversionRequest);
       prependNewConversionToHistory(newConversion);
       setQuantity("");
-    } catch (error) {
+      setConversionError(null);
+    } catch (error: any) {
       logError("Erro ao converter:", error);
+      if (error?.response?.status === 400 && error.response.data?.error) {
+        setConversionError(error.response.data.error);
+      } else {
+        setConversionError(null);
+      }
     }
-  };
+  }
 
   const buildConversionRequest = (crypto: Crypto, qty: string) => ({
     cryptoId: crypto.cryptoId,
@@ -115,7 +123,7 @@ export const Home = () => {
       </div>
       <div className="sm:hidden mb-4 w-full flex justify-end">
         <Button variant="danger" onClick={logout}>Sair</Button>
-     </div>
+      </div>
 
       <Card className="w-full max-w-4xl">
         <h2 className="text-xl font-semibold mb-4">Conversão</h2>
@@ -143,9 +151,17 @@ export const Home = () => {
             inputMode="decimal"
             required
             value={quantity}
-            onChange={(e) => {setQuantity(e.target.value.replace(",", "."))}}
+            onChange={(e) => {
+              setQuantity(e.target.value.replace(",", "."));
+            }}
           />
         </div>
+
+        {conversionError && (
+          <div className="mb-2 w-full text-red-600 text-sm font-medium text-center">
+            {conversionError}
+          </div>
+        )}
 
         <Button
           type="button"
