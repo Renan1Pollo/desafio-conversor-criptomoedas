@@ -1,7 +1,7 @@
 const Crypto = require("../../domain/entities/Crypto");
 
 class CryptoMapper {
-  static toEntity(apiData, brlRate = 5.0) {
+  static toEntity(apiData, brlRate = 5.64) {
     return new Crypto({
       cryptoId: apiData.id,
       cryptoName: apiData.name,
@@ -12,7 +12,7 @@ class CryptoMapper {
     });
   }
 
-  static toEntityList(apiList, brlRate = 5.7) {
+  static toEntityList(apiList, brlRate = 5.64) {
     return apiList.map((coin) => this.toEntity(coin, brlRate));
   }
 }

@@ -16,6 +16,7 @@ import { buildCryptoOptions } from "../utils/buildCryptoOptions";
 import { mapFavoriteToCrypto } from "../utils/mapFavoriteToCrypto";
 import { mapHistoryToTable } from "../utils/mapHistoryToTable";
 import { logError } from "../utils/log";
+import { useNavigate } from "react-router-dom";
 
 export const Home = () => {
   const [cryptos, setCryptos] = useState<Crypto[]>([]);
@@ -23,6 +24,8 @@ export const Home = () => {
   const [selectedCrypto, setSelectedCrypto] = useState<Crypto | null>(null);
   const [quantity, setQuantity] = useState("");
   const [historyItems, setHistoryItems] = useState<ConversionHistoryResponse[]>([]);
+  
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadInitialData();
@@ -39,8 +42,12 @@ export const Home = () => {
       setCryptos(cryptosData);
       setFavoriteCryptos(mapFavoriteToCrypto(favoritesRaw));
       setHistoryItems(historyData);
-    } catch (error) {
-}
+    } catch (error) {}
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   const convertSelectedCrypto = async () => {
@@ -103,6 +110,13 @@ export const Home = () => {
 
   return (
     <div className="p-8 flex flex-col gap-6 items-center bg-gray-100 min-h-screen">
+      <div className="hidden sm:block absolute top-2 right-4">
+        <Button variant="danger" onClick={logout}>Sair</Button>
+      </div>
+      <div className="sm:hidden mb-4 w-full flex justify-end">
+        <Button variant="danger" onClick={logout}>Sair</Button>
+     </div>
+
       <Card className="w-full max-w-4xl">
         <h2 className="text-xl font-semibold mb-4">Conversão</h2>
 

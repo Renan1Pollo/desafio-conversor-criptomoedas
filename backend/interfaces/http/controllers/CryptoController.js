@@ -15,7 +15,7 @@ class CryptoController {
       const currency = req.query.currency || "usd";
 
       const cryptosRaw = await this.fetchCryptosUseCase.fetchCryptocurrencies(currency);
-      const cryptos = CryptoMapper.toEntityList(cryptosRaw, 5.0);
+      const cryptos = CryptoMapper.toEntityList(cryptosRaw, 5.64);
 
       return res.status(200).json(cryptos);
     } catch (error) {
