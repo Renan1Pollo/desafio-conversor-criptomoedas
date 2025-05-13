@@ -33,6 +33,12 @@ O sistema utiliza um **frontend moderno** e um **backend robusto**, com cache Re
   <img src="https://img.shields.io/badge/Arquitetura%20Hexagonal-gray?style=for-the-badge" />
 </p>
 
+### ☁️ Deploy na AWS
+
+- O sistema está hospedado em uma instância EC2 da AWS com Docker, utilizando **proxy reverso via Nginx** para servir o frontend na porta padrão (80).
+- Acesse a aplicação online em:  
+- **http://desafiocriptomoedas.duckdns.org**
+
 ---
 
 ## ⚙️ Pré-requisitos
