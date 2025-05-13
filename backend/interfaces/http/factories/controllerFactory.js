@@ -3,6 +3,7 @@ const UserRepositoryAdapter = require("../../../infrastructure/repositories/User
 const FavoriteCryptoRepositoryAdapter = require("../../../infrastructure/repositories/FavoriteCryptoRepository");
 const ConversionHistoryRepositoryAdapter = require("../../../infrastructure/repositories/ConversionHistoryRepository");
 const CryptoMarketProvider = require("../../../infrastructure/providers/CryptoMarketProvider");
+const RedisCryptoCache = require('../../../infrastructure/cache/RedisCryptoCache');
 const db = require("../../../config/db");
 const jwtConfig = require("../../../config/jwtConfig");
 
@@ -27,13 +28,14 @@ const jwtService = new JwtService(jwtConfig.secret, jwtConfig.expiresIn);
 const userRepository = new UserRepositoryAdapter(db);
 const favoriteCryptoRepository = new FavoriteCryptoRepositoryAdapter(db);
 const conversionHistoryRepository = new ConversionHistoryRepositoryAdapter(db);
+const cryptoCache = new RedisCryptoCache(600);
 
 // Use Case Instances
 const authUserUseCase = new AuthUserUseCase(userRepository, jwtService);
 const createUserUseCase = new CreateUserUseCase(userRepository);
 const addFavoriteCryptoUseCase = new AddFavoriteCryptoUseCase(favoriteCryptoRepository);
 const removeFavoriteCryptoUseCase = new RemoveFavoriteCryptoUseCase(favoriteCryptoRepository);
-const fetchCryptosUseCase = new FetchCryptosUseCase(CryptoMarketProvider);
+const fetchCryptosUseCase = new FetchCryptosUseCase(CryptoMarketProvider, cryptoCache);
 const getFavoriteCryptosUseCase = new GetFavoriteCryptosUseCase(favoriteCryptoRepository);
 
 const getUserConversionHistoryUseCase = new GetUserConversionHistoryUseCase(conversionHistoryRepository);
