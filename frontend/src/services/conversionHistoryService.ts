@@ -30,7 +30,6 @@ export async function convertCrypto(
 export async function getConversionHistory(): Promise<ConversionHistoryResponse[]> {
   try {
     const response = await api.get(ENDPOINT);
-    console.log("response.data:", response.data);
     return response.data;
   } catch (error: any) {
     throw new Error("Erro ao buscar histórico de conversões.");

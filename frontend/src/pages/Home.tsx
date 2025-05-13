@@ -15,6 +15,7 @@ import type { Crypto } from "../types/Crypto";
 import { buildCryptoOptions } from "../utils/buildCryptoOptions";
 import { mapFavoriteToCrypto } from "../utils/mapFavoriteToCrypto";
 import { mapHistoryToTable } from "../utils/mapHistoryToTable";
+import { logError } from "../utils/log";
 
 export const Home = () => {
   const [cryptos, setCryptos] = useState<Crypto[]>([]);
@@ -39,8 +40,7 @@ export const Home = () => {
       setFavoriteCryptos(mapFavoriteToCrypto(favoritesRaw));
       setHistoryItems(historyData);
     } catch (error) {
-      console.error("Erro ao carregar dados iniciais:", error);
-    }
+}
   };
 
   const convertSelectedCrypto = async () => {
@@ -53,7 +53,7 @@ export const Home = () => {
       prependNewConversionToHistory(newConversion);
       setQuantity("");
     } catch (error) {
-      console.error("Erro ao converter:", error);
+      logError("Erro ao converter:", error);
     }
   };
 
@@ -95,7 +95,7 @@ export const Home = () => {
         setFavoriteCryptos((prev) => [...prev, crypto]);
       }
     } catch (error) {
-      console.error("Erro ao atualizar favoritos:", error);
+      logError("Erro ao atualizar favoritos:", error);
     }
   };
 
