@@ -96,7 +96,7 @@ npm run dev
 4. Em outro terminal, inicie o frontend:
 ```bash
 cd frontend
-npm run dev
+node interfaces/http/App.js
 ```
 
 ---
